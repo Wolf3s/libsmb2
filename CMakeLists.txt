@@ -10,7 +10,7 @@ if(NOT ESP_PLATFORM)
     cmake_minimum_required(VERSION 3.5)
   endif()
 
-  if(PLATFORM_PS2 AND IOP AND BUILD_IRX)
+  if(IOP AND BUILD_IRX)
     project(smb2man
             LANGUAGES C
             VERSION 4.0.0
@@ -27,7 +27,7 @@ endif()
 
   if(NOT PICO_BOARD OR NOT ESP_PLATFORM)
       set(SOVERSION 1 CACHE STRING "" FORCE)
-      if(NOT PLATFORM_PS2 AND NOT IOP AND NOT BUILD_IRX)
+      if(NOT IOP AND NOT BUILD_IRX)
         set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "Installation directory for libraries")
         set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
         set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
@@ -51,7 +51,7 @@ endif()
       endif()
   endif()
 
-  if(NOT IOP OR NOT PICO_BOARD OR NOT ESP_PLATFORM)
+  if(NOT PICO_BOARD OR NOT ESP_PLATFORM)
       include(cmake/ConfigureChecks.cmake)
   endif()
 
@@ -144,8 +144,13 @@ endif()
       endif()      
     elseif(IOP)
       add_definitions(-DHAVE_CONFIG_H -DNEED_BE64TOH -DNEED_STRDUP -DNEED_READV -DNEED_WRITEV -DNEED_POLL -DNEED_GETPID -DNEED_RANDOM -DNEED_SRANDOM -DNEED_GETLOGIN_R -DHAVE_STRING_H -DHAVE_SYS_FCNTL_H)
-      if(PLATFORM_PS2 AND IOP AND BUILD_IRX)
+      if(IOP AND BUILD_IRX)
         add_definitions(-D__ps2sdk_iop__)
+        if(DEBUG)
+          add_definitions(-DDEBUG)
+        endif()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fno-builtin")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")                
       endif()
       set(CMAKE_C_FLAGS "-Wall") 
       include_directories(${CMAKE_CURRENT_BINARY_DIR} include/ps2)
@@ -167,21 +172,19 @@ endif()
       list(APPEND CORE_LIBRARIES ${SOCKET_LIBRARY} ${NSL_LIBRARY})
     endif()
 
+
     if(ENABLE_EXAMPLES)
       add_subdirectory(examples)
     endif()
-    if(PLATFORM_PS2 AND IOP AND BUILD_IRX)
-      add_subdirectory(lib/ps2)
-    else()  
-      add_subdirectory(lib)
-    endif()
+
+    add_subdirectory(lib)
 
   if(NOT PICO_BOARD OR ESP_PLATFORM)
       include(CMakePackageConfigHelpers)
       write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/libsmb2-config-version.cmake
                                     VERSION ${PROJECT_VERSION}
                                     COMPATIBILITY AnyNewerVersion)
-    if(NOT PLATFORM_PS2 AND NOT IOP AND NOT BUILD_IRX)
+    if(NOT IOP AND NOT BUILD_IRX)
       configure_file(cmake/libsmb2.pc.cmake
                   ${CMAKE_CURRENT_BINARY_DIR}/libsmb2.pc @ONLY)
 
