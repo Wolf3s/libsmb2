@@ -105,7 +105,7 @@ elseif(ESP_PLATFORM)
 
   register_component()
 
-elseif(BUILD_IRX AND IOP)
+elseif(IOP AND BUILD_IRX)
   set(SOURCES 
             ps2/smb2_fio.c
             ps2/smb2man.c

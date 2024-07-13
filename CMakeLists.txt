@@ -1,4 +1,5 @@
 if(NOT ESP_PLATFORM)
+  
   if(CMAKE_SYSTEM_NAME MATCHES NintendoSwitch OR CMAKE_SYSTEM_NAME MATCHES Nintendo3DS OR CMAKE_SYSTEM_NAME MATCHES Dreamcast OR CMAKE_SYSTEM_NAME MATCHES NintendoGameCube OR CMAKE_SYSTEM_NAME MATCHES NintendoDS OR CMAKE_SYSTEM_NAME MATCHES NintendoWii OR CMAKE_SYSTEM_NAME MATCHES CafeOS)
     cmake_minimum_required(VERSION 3.13)
   elseif(VITA)
@@ -10,11 +11,20 @@ if(NOT ESP_PLATFORM)
     cmake_minimum_required(VERSION 3.5)
   endif()
 
-  if(IOP AND BUILD_IRX)
+  if(NOT IOP AND BUILD_IRX)
     project(smb2man
             LANGUAGES C
-            VERSION 4.0.0
+            VERSION 2.2.0
     )
+    set(VERSION 2.2.0)    
+    set(PACKAGE "smb2man")
+    set(PACKAGE_BUGREPORT "ronniesahlberg@gmail.com or andregui17@outlook.com")
+    set(PACKAGE_NAME "smb2man")
+    set(PACKAGE_VERSION "${VERSION}")
+    set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+    set(PACKAGE_TARNAME "${PACKAGE}")
+    set(PACKAGE_URL "https://github.com/sahlberg/libsmb2")
+  
   elseif(PICO_BOARD)
     project(libsmb2 C CXX ASM)
   else()
@@ -22,8 +32,19 @@ if(NOT ESP_PLATFORM)
             LANGUAGES C
             VERSION 4.0.0
     )  
+    set(VERSION 4.0.0)
+    set(PACKAGE "libsmb2")
+    set(PACKAGE_BUGREPORT "ronniesahlberg@gmail.com")
+    set(PACKAGE_NAME "libsmb2")
+    set(PACKAGE_VERSION "${VERSION}")
+    set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+    set(PACKAGE_TARNAME "${PACKAGE}")
+    set(PACKAGE_URL "https://github.com/sahlberg/libsmb2")
   endif()
+  configure_file(libsmb2.pc.in libsmb2.pc @ONLY) 
+
 endif()
+
 
   if(NOT PICO_BOARD OR NOT ESP_PLATFORM)
       set(SOVERSION 1 CACHE STRING "" FORCE)
