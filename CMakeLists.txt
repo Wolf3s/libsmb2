@@ -24,7 +24,6 @@ if(NOT ESP_PLATFORM)
     set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
     set(PACKAGE_TARNAME "${PACKAGE}")
     set(PACKAGE_URL "https://github.com/sahlberg/libsmb2")
-  
   elseif(PICO_BOARD)
     project(libsmb2 C CXX ASM)
   else()
@@ -41,8 +40,7 @@ if(NOT ESP_PLATFORM)
     set(PACKAGE_TARNAME "${PACKAGE}")
     set(PACKAGE_URL "https://github.com/sahlberg/libsmb2")
   endif()
-  configure_file(libsmb2.pc.in libsmb2.pc @ONLY) 
-
+  configure_file(libsmb2.pc.in libsmb2.pc @ONLY)
 endif()
 
 
@@ -64,12 +62,10 @@ endif()
         list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
   endif()
 
-  if(IOS)
-      find_package(GSSAPI)
-
-      if(GSSAPI_FOUND)
-        add_definitions(-DHAVE_LIBKRB5)
-      endif()
+  if(CMAKE_SYSTEM_NAME MATCHES Linux)
+    find_package(LibKrb5)
+  elseif(IOS)
+    find_package(GSSAPI)  
   endif()
 
   if(NOT PICO_BOARD OR NOT ESP_PLATFORM)
@@ -99,8 +95,10 @@ endif()
       )
     endif()
     
-    if(IOS)
-      set(core_DEPENDS ${GSSAPI_LIBRARIES} CACHE STRING "" FORCE)
+    if(CMAKE_SYSTEM_NAME MATCHES Linux)
+      set(core_DEPENDS ${LIBKRB5_LIBRARY} CACHE STRING "" FORCE)  
+    elseif(IOS)
+      set(core_DEPENDS ${GSSAPI_LIBRARIES} CACHE STRING "" FORCE)   
     endif()
 
     if(MSVC AND BUILD_SHARED_LIBS)

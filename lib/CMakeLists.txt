@@ -1,104 +1,57 @@
-if(PICO_BOARD)
-   add_library(libsmb2 STATIC
-            lib/aes.c
-            lib/aes128ccm.c
-            lib/alloc.c
-			lib/compat.c
-            lib/dcerpc.c
-            lib/dcerpc-lsa.c
-            lib/dcerpc-srvsvc.c
-            lib/errors.c
-			lib/hmac.c
-            lib/hmac-md5.c
-            lib/init.c
-            lib/krb5-wrapper.c
-            lib/libsmb2.c
-            lib/md4c.c
-            lib/md5.c
-            lib/ntlmssp.c
-            lib/pdu.c
-            lib/sha1.c
-            lib/sha224-256.c
-            lib/sha384-512.c
-            lib/smb2-cmd-close.c
-            lib/smb2-cmd-create.c
-            lib/smb2-cmd-echo.c
-            lib/smb2-cmd-error.c
-            lib/smb2-cmd-flush.c
-            lib/smb2-cmd-ioctl.c
-            lib/smb2-cmd-logoff.c
-            lib/smb2-cmd-negotiate.c
-            lib/smb2-cmd-query-directory.c
-            lib/smb2-cmd-query-info.c
-            lib/smb2-cmd-read.c
-            lib/smb2-cmd-session-setup.c
-            lib/smb2-cmd-set-info.c
-            lib/smb2-cmd-tree-connect.c
-            lib/smb2-cmd-tree-disconnect.c
-            lib/smb2-cmd-write.c
-            lib/smb2-data-file-info.c
-            lib/smb2-data-filesystem-info.c
-            lib/smb2-data-security-descriptor.c
-            lib/smb2-data-reparse-point.c
-            lib/smb2-share-enum.c
-            lib/smb3-seal.c
-            lib/smb2-signing.c
-            lib/socket.c
-            lib/sync.c
-            lib/timestamps.c
-            lib/unicode.c
-            lib/usha.c
-    )
-elseif(ESP_PLATFORM)
+if(GSSAPI_FOUND OR LIBKRB5_FOUND)
+  set(KRB5_SOURCE krb5-wrapper.c)
+endif()
+
+if(ESP_PLATFORM)
   set(COMPONENT_SRCS
-    lib/aes.c
-    lib/aes128ccm.c
-    lib/alloc.c
-	lib/compat.c
-    lib/dcerpc.c
-    lib/dcerpc-lsa.c
-    lib/dcerpc-srvsvc.c
-    lib/errors.c
-    lib/init.c
-    lib/hmac.c
-    lib/hmac-md5.c
-    lib/krb5-wrapper.c
-    lib/libsmb2.c
-    lib/md4c.c
-    lib/md5.c
-    lib/ntlmssp.c
-    lib/pdu.c
-    lib/sha1.c
-    lib/sha224-256.c
-    lib/sha384-512.c
-    lib/smb2-cmd-close.c
-    lib/smb2-cmd-create.c
-    lib/smb2-cmd-echo.c
-    lib/smb2-cmd-error.c
-    lib/smb2-cmd-flush.c
-    lib/smb2-cmd-ioctl.c
-    lib/smb2-cmd-logoff.c
-    lib/smb2-cmd-negotiate.c
-    lib/smb2-cmd-query-directory.c
-    lib/smb2-cmd-query-info.c
-    lib/smb2-cmd-read.c
-    lib/smb2-cmd-session-setup.c
-    lib/smb2-cmd-set-info.c
-    lib/smb2-cmd-tree-connect.c
-    lib/smb2-cmd-tree-disconnect.c
-    lib/smb2-cmd-write.c
-    lib/smb2-data-file-info.c
-    lib/smb2-data-filesystem-info.c
-    lib/smb2-data-security-descriptor.c
-    lib/smb2-data-reparse-point.c
-    lib/smb2-share-enum.c
-    lib/smb3-seal.c
-    lib/smb2-signing.c
-    lib/socket.c
-    lib/sync.c
-    lib/timestamps.c
-    lib/unicode.c
-    lib/usha.c
+    aes.c
+    aes128ccm.c
+    alloc.c
+	compat.c
+    dcerpc.c
+    dcerpc-lsa.c
+    dcerpc-srvsvc.c
+    errors.c
+    init.c
+    hmac.c
+    hmac-md5.c
+    ${KRB5_SOURCE}
+    libsmb2.c
+    md4c.c
+    md5.c
+    ntlmssp.c
+    pdu.c
+    sha1.c
+    sha224-256.c
+    sha384-512.c
+    smb2-cmd-close.c
+    smb2-cmd-create.c
+    smb2-cmd-echo.c
+    smb2-cmd-error.c
+    smb2-cmd-flush.c
+    smb2-cmd-ioctl.c
+    smb2-cmd-logoff.c
+    smb2-cmd-negotiate.c
+    smb2-cmd-query-directory.c
+    smb2-cmd-query-info.c
+    smb2-cmd-read.c
+    smb2-cmd-session-setup.c
+    smb2-cmd-set-info.c
+    smb2-cmd-tree-connect.c
+    smb2-cmd-tree-disconnect.c
+    smb2-cmd-write.c
+    smb2-data-file-info.c
+    smb2-data-filesystem-info.c
+    smb2-data-security-descriptor.c
+    smb2-data-reparse-point.c
+    smb2-share-enum.c
+    smb3-seal.c
+    smb2-signing.c
+    socket.c
+    sync.c
+    timestamps.c
+    unicode.c
+    usha.c
   )
 
   set(COMPONENT_NAME ".")
@@ -121,7 +74,7 @@ elseif(IOP AND BUILD_IRX)
             hmac.c
             hmac-md5.c			
             init.c
-            krb5-wrapper.c
+            ${KRB5_SOURCE}
             libsmb2.c
             md4c.c
             md5.c
@@ -158,6 +111,7 @@ elseif(IOP AND BUILD_IRX)
             timestamps.c
             unicode.c
 	    usha.c)
+
 BUILD_IOP_IMPORTS(${CMAKE_CURRENT_SOURCE_DIR}/ps2/imports.c ${CMAKE_CURRENT_SOURCE_DIR}/ps2/imports.lst)
 
 else()
@@ -172,7 +126,7 @@ else()
             hmac.c
             hmac-md5.c			
             init.c
-            krb5-wrapper.c
+            ${KRB5_SOURCE}
             libsmb2.c
             md4c.c
             md5.c
@@ -211,7 +165,7 @@ else()
 	    usha.c)
 endif()
 
-if(NOT PICO_BOARD OR NOT ESP_PLATFORM)
+if(NOT ESP_PLATFORM)
 set(INCLUDE_PATH ../include)
 set(SMB2_INCLUDE "${INCLUDE_PATH}/smb2")
 set(HEADERS
@@ -251,7 +205,9 @@ target_link_libraries(smb2man.irx
 	PRIVATE
 	gcc)
 
-add_custom_command(TARGET smb2man.irx POST_BUILD COMMAND md5sum ARGS smb2man.irx)                         
+add_custom_command(TARGET smb2man.irx POST_BUILD COMMAND md5sum ARGS smb2man.irx)
+elseif(PICO_BOARD)
+add_library(libsmb2 STATIC ${SOURCES})
 else()
 add_library(smb2 ${SOURCES} ${HEADERS})
 target_link_libraries(smb2 PUBLIC ${core_DEPENDS} ${CORE_LIBRARIES})
