@@ -249,7 +249,12 @@ DESTINATION ${PS2SDK}/common/include)
 install(TARGETS smb2man.irx EXPORT smb2man.irx
                             RUNTIME DESTINATION bin
                             ARCHIVE DESTINATION smb2man.irx
-                            LIBRARY DESTINATION smb2man.irx)                    
+                            LIBRARY DESTINATION smb2man.irx)
+elseif(HAIKU)
+install(TARGETS smb2 EXPORT smb2
+RUNTIME DESTINATION bin
+                      ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
+                      LIBRARY DESTINATION ${INSTALL_LIB_DIR})                    
 else()
 install(TARGETS smb2 EXPORT smb2
                      RUNTIME DESTINATION bin

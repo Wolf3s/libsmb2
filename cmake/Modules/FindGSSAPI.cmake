@@ -8,8 +8,15 @@
 # GSSAPI_FOUND - system has gssapi
 # GSSAPI_INCLUDE_DIRS - the gssapi include directory
 # GSSAPI_LIBRARIES - the gssapi libraries
-
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+if(LIB_SUFFIX STREQUAL "x32")
+find_library(GSSAPI_LIBRARY NAMES gssapi)
+else
 find_library(GSSAPI_LIBRARY NAMES gssapi_krb5)
+endif()
+else()
+find_library(GSSAPI_LIBRARY NAMES gssapi_krb5)
+endif()
 
 find_path(GSSAPI_INCLUDE_DIR NAMES gssapi.h
                                    gssapi/gssapi.h)
