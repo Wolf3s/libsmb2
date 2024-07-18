@@ -11,7 +11,7 @@
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
 if(LIB_SUFFIX STREQUAL "x32")
 find_library(GSSAPI_LIBRARY NAMES gssapi)
-else
+else()
 find_library(GSSAPI_LIBRARY NAMES gssapi_krb5)
 endif()
 else()
