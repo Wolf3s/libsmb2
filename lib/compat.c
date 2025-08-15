@@ -407,6 +407,11 @@ ssize_t writev(t_socket fd, const struct iovec* vector, int count)
         }
         bytes_written = write((int)fd, buffer, bytes);
         free(buffer);
+#ifdef _IOP
+        if (bytes_written < 0)
+            errno = EWOULDBLOCK;
+#endif
+
         return bytes_written;
 }
 #endif
@@ -436,6 +441,9 @@ ssize_t readv(t_socket fd, const struct iovec* vector, int count)
         /* Read the data.  */
         bytes_read = read((int)fd, buffer, bytes);
         if (bytes_read < 0) {
+#ifdef _IOP
+                errno = EWOULDBLOCK;
+#endif
                 free(buffer);
                 return -1;
         }

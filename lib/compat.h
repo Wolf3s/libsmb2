@@ -446,7 +446,7 @@ struct sockaddr_storage {
 
 #ifdef _IOP
 typedef uint32_t UWORD32;
-typedef size_t ssize_t;
+typedef int ssize_t;
 #include <tcpip.h>
 #endif
 

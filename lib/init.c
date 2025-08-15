@@ -473,6 +473,9 @@ void smb2_set_error(struct smb2_context *smb2, const char *error_string, ...)
         if(smb2->error_cb) {
                 smb2->error_cb(smb2, smb2_get_error(smb2));
         }
+#else
+        if (error_string != NULL && error_string[0] != '\0')
+                printf("SMB2 ERROR: %s\n", error_string);
 #endif
 }
 

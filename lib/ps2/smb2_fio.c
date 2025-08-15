@@ -21,11 +21,15 @@
 #include "thbase.h"
 #include "thsemap.h"
 #include "errno.h"
-#include "ps2smb2.h"
-#include "smb2_fio.h"
 #include "loadcore.h"
+
 #include <stdint.h>
 #include <stdbool.h>
+
+#include "ps2smb2.h"
+#include "smb2_fio.h"
+
+#include "../compat.h"
 
 #include <smb2/smb2.h>
 #include <smb2/libsmb2.h>
@@ -52,9 +56,6 @@ char log_buf[1024];
 #else
 #define SMB2LOG(...)
 #endif
-
-void free(void *);
-void *malloc(int);
 
 int smb2man_io_sema;
 static char *smb2_curdir;
@@ -89,13 +90,13 @@ static struct smb2_context *find_context(char *path, char **remainder)
         return NULL;
     }
 
-    *tmp++ = 0;
-    if (*remainder) {
-        *remainder = tmp;
+    *tmp = '\0';
+    if (remainder != NULL) {
+        *remainder = tmp + 1;
     }
 
     while (share) {
-        if (strcmp(share->name, path)) {
+        if (!strcmp(share->name, path)) {
             return share->smb2;
         }
         share = share->next;
@@ -189,27 +190,37 @@ static int smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
     share->next = shares;
     strcpy(share->name, in->name);
     share->smb2 = smb2_init_context();
-    smb2_set_timeout(share->smb2, 30);
     if (share->smb2 == NULL) {
         SMB2LOG("Failed to initialize smb2 context\n");
         free(share);
         return -ENOMEM;
     }
+    smb2_set_timeout(share->smb2, 30);
     url = smb2_parse_url(share->smb2, in->url);
     if (url == NULL) {
         SMB2LOG("Failed to parse URL: %s\n", in->url);
         free(share);
         return -EINVAL;
     }
-    smb2_set_password(share->smb2, in->password);
-    rc = smb2_connect_share(share->smb2, url->server, url->share, in->username);
-    smb2_destroy_url(url);
+    if (url->user)
+        smb2_set_user(share->smb2, url->user);
+    if (in->username[0] != '\0')
+        smb2_set_user(share->smb2, in->username);
+    if (in->password[0] != '\0')
+        smb2_set_password(share->smb2, in->password);
+
+    //smb2_set_domain(share->smb2, "WORKGROUP");
+    smb2_set_workstation(share->smb2, "PS2");
+    smb2_set_security_mode(share->smb2, SMB2_NEGOTIATE_SIGNING_ENABLED);
+
+    rc = smb2_connect_share(share->smb2, url->server, url->share, NULL);
     if (rc) {
+        SMB2LOG("Failed to connect to share: %s %s\n", in->url, smb2_get_error(share->smb2));
         smb2_destroy_context(share->smb2);
         free(share);
-        SMB2LOG("Failed to connect to share: %s %s\n", in->url, smb2_get_error(share->smb2));
         return -EIO;
     }
+    smb2_destroy_url(url);
     shares = share;
     if (out) {
         out->ctx = share->smb2;
@@ -258,7 +269,8 @@ struct file_fh
 
 int SMB2_open(iop_file_t *f, const char *filename, int flags, int mode)
 {
-    char *path = NULL, *p;
+    char *path;
+    char *p;
     struct smb2_context *smb2;
     struct file_fh *ffh = NULL;
     int rc = 0;
@@ -284,7 +296,7 @@ int SMB2_open(iop_file_t *f, const char *filename, int flags, int mode)
         goto out;
     }
 
-    ffh = malloc(sizeof(struct file_fh));
+    ffh = calloc(1, sizeof(struct file_fh));
     if (ffh == NULL) {
         rc = -ENOMEM;
         goto out;
@@ -303,7 +315,7 @@ int SMB2_open(iop_file_t *f, const char *filename, int flags, int mode)
 
 
 out:
-    if (rc) {
+    if ((ffh != NULL) && (rc != 0)) {
         free(ffh);
     }
     free(path);

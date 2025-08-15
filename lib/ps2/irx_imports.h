@@ -18,7 +18,6 @@
 #include <intrman.h>
 #include <ioman.h>
 #include <ps2ip.h>
-#include <sifman.h>
 #include <stdio.h>
 #include <sysclib.h>
 #include <sysmem.h>
